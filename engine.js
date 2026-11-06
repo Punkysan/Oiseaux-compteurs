@@ -166,6 +166,7 @@
       },
       scoring: opts.scoring || 'cards',
       scoringParam: opts.scoringParam !== undefined ? opts.scoringParam : 5,
+      difficulty: opts.difficulty === 'easy' ? 'easy' : 'normal',
       match: {
         rounds: solo ? 1 : (opts.matchRounds || 1),
         mode: opts.matchMode || 'manches',
@@ -408,7 +409,9 @@
     const scores = scoreRound(state);
     const max = Math.max(...scores.map(x => x.score));
     const winners = scores.filter(x => x.score === max).map(x => x.player);
-    const result = { round: state.roundNumber, scores, winners };
+    // Snapshot des cartes capturées : permet d'afficher la justification du vainqueur.
+    const capturedSnapshots = state.players.map(p => p.captured.map(c => ({ value: c.value, color: c.color })));
+    const result = { round: state.roundNumber, scores, winners, capturedSnapshots };
     state.match.results.push(result);
     return result;
   }
@@ -436,7 +439,9 @@
     const r = rng || Math.random;
     const legal = legalPlaysForPlayer(state, pi);
     const p = state.players[pi];
+    const easy = state.difficulty === 'easy';
     if (legal.mustExpose || legal.plis.length === 0) {
+      if (easy) return { type: 'expose', handIndex: Math.floor(r() * p.hand.length) };
       let best = [];
       let bestV = Infinity;
       for (let i = 0; i < p.hand.length; i++) {
@@ -445,6 +450,12 @@
         else if (v === bestV) best.push(i);
       }
       return { type: 'expose', handIndex: best[Math.floor(r() * best.length)] };
+    }
+    if (easy) {
+      // Niveau facile (6-7 ans) : le robot choisit un pli au hasard parmi tous les plis légaux.
+      const all = [];
+      for (const pl of legal.plis) for (const opt of pl.options) all.push({ type: 'pli', handIndex: pl.handIndex, tableIndices: opt.slice() });
+      return all[Math.floor(r() * all.length)];
     }
     let bestKey = null;
     const cands = [];

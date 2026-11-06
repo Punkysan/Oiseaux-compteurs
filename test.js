@@ -216,4 +216,52 @@ console.log('Match multi-manches :');
   ok(mw.winners.length >= 1, 'vainqueur du match déterminé (' + mw.winners.map(i => s.players[i].name).join(', ') + ')');
 }
 
+// ---------- Difficulté du robot et justification ----------
+console.log('Difficulté du robot et snapshot de justification :');
+{
+  const mk = (v, c, id) => ({ id, value: v, color: c });
+  // Snapshot des cartes capturées dans le résultat de manche (justification du vainqueur)
+  const s = E.newGame({ numPlayers: 2, rng: E.mulberry32(11) });
+  s.players[0].captured = [mk(5, 'bleu', 1), mk(5, 'jaune', 2)];
+  s.players[1].captured = [mk(3, 'orange', 3)];
+  const res = E.finishRound(s);
+  ok(Array.isArray(res.capturedSnapshots) && res.capturedSnapshots[0].length === 2 &&
+     res.capturedSnapshots[0][0].value === 5 && res.capturedSnapshots[0][0].color === 'bleu',
+    'finishRound fournit un snapshot des cartes capturées (pour afficher la justification)');
+
+  // Robot normal : choisit le pli capturant le plus de cartes
+  const rig = (diff) => {
+    const st = E.newGame({ numPlayers: 2, names: ['Hum', 'Bot'], rng: E.mulberry32(1), difficulty: diff });
+    st.players[0].hand = [mk(1, 'bleu', 90), mk(2, 'jaune', 91), mk(3, 'orange', 92)];
+    st.players[1].hand = [mk(5, 'bleu', 10), mk(8, 'jaune', 11), mk(10, 'violet', 12)];
+    st.table = [mk(5, 'jaune', 20), mk(3, 'jaune', 21), mk(2, 'orange', 22), mk(1, 'violet', 23)];
+    st.drawPile = [mk(9, 'bleu', 30)];
+    st.current = 1; st.starter = 1;
+    return st;
+  };
+  const sn = rig('normal');
+  const an = E.botChooseAction(sn, 1, E.mulberry32(2));
+  ok(an.type === 'pli' && an.tableIndices.length === 3, 'robot normal : pli capturant le plus de cartes (3 sur 4 exposées)');
+
+  // Robot facile : n'importe quel pli légal, toujours accepté par le moteur
+  const se = rig('easy');
+  let legalCount = 0;
+  for (let k = 0; k < 30; k++) {
+    const st = rig('easy');
+    const a = E.botChooseAction(st, 1, E.mulberry32(k));
+    E.playTurn(st, 1, a); // lève une exception si illégal
+    legalCount++;
+  }
+  ok(legalCount === 30, 'robot facile : 30 actions tirées au hasard, toutes légales');
+
+  // Parties complètes avec robot facile
+  for (let seed = 1; seed <= 10; seed++) {
+    const rng = E.mulberry32(seed * 77);
+    const st = E.newGame({ numPlayers: 3, rng, difficulty: 'easy' });
+    let turns = 0;
+    while (st.phase === 'play' && turns++ < 5000) E.playTurn(st, st.current, E.botChooseAction(st, st.current, rng));
+    ok(st.phase === 'roundOver', 'partie 3 joueurs, robot facile, graine ' + seed + ' terminée');
+  }
+}
+
 console.log('\nTous les tests ont réussi (' + passed + ' assertions).');

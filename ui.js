@@ -60,6 +60,7 @@
     $('#field-rounds').hidden = solo;
     $('#field-matchmode').hidden = solo;
     $('#field-scoring').hidden = solo;
+    $('#field-difficulty').hidden = solo;
     $('#field-seuil').hidden = solo || $('#cfg-scoring').value !== 'le5';
   }
 
@@ -81,6 +82,7 @@
       },
       scoring: $('#cfg-scoring').value,
       scoringParam: parseInt($('#cfg-seuil').value, 10) || 5,
+      difficulty: $('#cfg-difficulty').value,
       matchRounds: numPlayers === 1 ? 1 : parseInt($('#cfg-rounds').value, 10),
       matchMode: $('#cfg-matchmode').value,
     };
@@ -349,6 +351,16 @@
   }
 
   // ---------- Modale de fin ----------
+  function appendCapturedBlock(container, player, cards, label) {
+    const wrap = el('div', 'captured-block');
+    wrap.appendChild(el('h3', null, '🂠 Cartes ramassées par ' + player.name + ' (' + cards.length + ' carte' + (cards.length > 1 ? 's' : '') + ') — ' + label));
+    const row = el('div', 'captured-row');
+    if (cards.length === 0) row.appendChild(el('span', null, 'aucune'));
+    for (const c of cards) row.appendChild(cardEl({ value: c.value, color: c.color }, { small: true }));
+    wrap.appendChild(row);
+    container.appendChild(wrap);
+  }
+
   function showEndModal(res, bestSolo) {
     const matchOver = state.roundNumber >= state.match.rounds;
     $('#end-title').textContent = state.solo
@@ -384,6 +396,11 @@
       body.appendChild(el('div', null, res.winners.length > 0
         ? 'Vainqueur de la manche : ' + res.winners.map((i) => state.players[i].name).join(', ') + ' !'
         : 'Égalité !'));
+      // Justification : si un robot remporte la manche, on affiche ses cartes capturées.
+      for (const id of res.winners.filter((i) => state.players[i].isBot)) {
+        const snap = res.capturedSnapshots ? res.capturedSnapshots[id] : state.players[id].captured;
+        appendCapturedBlock(body, state.players[id], snap, 'manche ' + res.round);
+      }
 
       if (matchOver) {
         const mw = E.matchWinner(state);
@@ -405,6 +422,15 @@
           ? '🏆 Vainqueur du match : ' + mw.winners.map((i) => state.players[i].name).join(', ') + ' !'
           : 'Match nul !'));
         body.appendChild(block);
+        // Justification : si un robot remporte le match, on affiche ses cartes de la dernière manche
+        // (uniquement en multi-manches, sinon la justification de manche suffit).
+        if (state.match.rounds > 1) {
+          const last = state.match.results[state.match.results.length - 1];
+          for (const id of mw.winners.filter((i) => state.players[i].isBot)) {
+            const snap = last && last.capturedSnapshots ? last.capturedSnapshots[id] : state.players[id].captured;
+            appendCapturedBlock(body, state.players[id], snap, 'dernière manche');
+          }
+        }
       }
     }
 
