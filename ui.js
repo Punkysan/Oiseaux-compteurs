@@ -179,15 +179,12 @@
 
     const vol = $('#voliere');
     vol.innerHTML = '';
-    const legal = currentLegal();
-    const selPl = legal && ui.selHand !== null ? legal.plis.find((p) => p.handIndex === ui.selHand) : null;
-    const targetSet = new Set();
-    if (selPl) for (const opt of selPl.options) for (const i of opt) targetSet.add(i);
+    const selectable = humanTurn() && ui.selHand !== null;
 
     state.table.forEach((card, i) => {
       const d = cardEl(card);
-      if (selPl) {
-        if (targetSet.has(i)) d.classList.add('target');
+      if (selectable) {
+        d.classList.add('clickable');
         if (ui.selTable.has(i)) d.classList.add('selected');
         d.addEventListener('click', () => onTableClick(i));
       }
@@ -199,25 +196,15 @@
     const wrap = $('#hand');
     wrap.innerHTML = '';
     $('#hand-label').textContent = 'Ta main — ' + state.players[0].name;
-    const legal = currentLegal();
+    const mine = humanTurn();
     state.players[0].hand.forEach((card, i) => {
       const d = cardEl(card);
-      if (legal) {
-        if (legal.mustExpose || legal.plis.some((p) => p.handIndex === i)) d.classList.add('playable');
-        else d.classList.add('disabled');
-      }
+      if (mine) d.classList.add('clickable');
       if (ui.selHand === i) d.classList.add('selected');
       d.addEventListener('click', () => onHandClick(i));
       wrap.appendChild(d);
     });
-    renderMessage(legal);
-  }
-
-  function selectionValid(legal) {
-    if (ui.selHand === null || !legal) return false;
-    const pl = legal.plis.find((p) => p.handIndex === ui.selHand);
-    if (!pl) return false;
-    return pl.options.some((o) => o.length === ui.selTable.size && o.every((i) => ui.selTable.has(i)));
+    renderMessage(mine ? E.legalPlaysForPlayer(state, 0) : null);
   }
 
   function renderMessage(legal) {
@@ -235,29 +222,23 @@
       return;
     }
     if (!legal) return;
-    if (legal.mustExpose) {
-      box.appendChild(el('div', null, 'Aucun pli possible : clique sur une de tes cartes pour la poser dans la volière.'));
-      return;
-    }
     if (ui.selHand === null) {
-      box.appendChild(el('div', null, 'À toi de jouer, ' + cur.name + ' ! Choisis une carte en main pour faire un pli.'));
+      box.appendChild(el('div', null, 'À toi de jouer, ' + cur.name + ' ! Choisis une carte en main.'));
       return;
     }
-    const pl = legal.plis.find((p) => p.handIndex === ui.selHand);
     const card = state.players[0].hand[ui.selHand];
-    const div = el('div', null,
-      'Carte choisie : ' + E.cardLabel(card) + '. Clique sur les cartes de la volière à ramasser (elles doivent totaliser ' + card.value + '), puis valide.');
-    box.appendChild(div);
-    if (pl && pl.options.length === 1 && pl.options[0].length === 1) {
-      box.appendChild(el('div', null, 'Prise obligatoire : la carte de valeur identique.'));
-    }
+    box.appendChild(el('div', null,
+      'Carte choisie : ' + E.cardLabel(card) + '. Sélectionne des cartes de la volière à ramasser avec cette carte et valide le pli — ou pose la carte dans la volière.'));
     const actions = el('div', 'actions');
-    const okBtn = el('button', 'action-btn', '✔ Valider le pli (' + ui.selTable.size + ' carte' + (ui.selTable.size > 1 ? 's' : '') + ')');
-    okBtn.disabled = !selectionValid(legal);
+    const okBtn = el('button', 'action-btn validate', '✔ Valider le pli (' + ui.selTable.size + ' carte' + (ui.selTable.size > 1 ? 's' : '') + ')');
+    okBtn.disabled = ui.selTable.size === 0;
     okBtn.addEventListener('click', validatePli);
+    const exposeBtn = el('button', 'action-btn expose', '➕ Poser cette carte dans la volière');
+    exposeBtn.addEventListener('click', exposeSelected);
     const cancelBtn = el('button', 'action-btn cancel', '✖ Annuler');
     cancelBtn.addEventListener('click', () => { ui.selHand = null; ui.selTable = new Set(); render(); });
     actions.appendChild(okBtn);
+    actions.appendChild(exposeBtn);
     actions.appendChild(cancelBtn);
     box.appendChild(actions);
   }
@@ -266,13 +247,8 @@
   function onHandClick(i) {
     if (!humanTurn()) return;
     const legal = E.legalPlaysForPlayer(state, 0);
-    if (legal.mustExpose) {
-      doAction({ type: 'expose', handIndex: i });
-      return;
-    }
     const pl = legal.plis.find((p) => p.handIndex === i);
-    if (!pl) return;
-    if (pl.options.length === 1 && pl.options[0].length === 1) {
+    if (pl && pl.options.length === 1 && pl.options[0].length === 1) {
       doAction({ type: 'pli', handIndex: i, tableIndices: pl.options[0] });
       return;
     }
@@ -289,9 +265,13 @@
   }
 
   function validatePli() {
-    const legal = E.legalPlaysForPlayer(state, 0);
-    if (!selectionValid(legal)) return;
+    if (ui.selHand === null || ui.selTable.size === 0) return;
     doAction({ type: 'pli', handIndex: ui.selHand, tableIndices: Array.from(ui.selTable) });
+  }
+
+  function exposeSelected() {
+    if (ui.selHand === null) return;
+    doAction({ type: 'expose', handIndex: ui.selHand });
   }
 
   function doAction(action) {

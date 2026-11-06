@@ -201,14 +201,12 @@ label.check input { margin-right: 8px; transform: scale(1.2); }
 #hand { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 #hand .card { width: 104px; height: 146px; }
 #hand .card .val { font-size: 2.6rem; }
-#hand .card.playable { cursor: pointer; }
-#hand .card.playable:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 8px 14px rgba(0, 0, 0, .3); }
+#hand .card.clickable { cursor: pointer; }
+#hand .card.clickable:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 8px 14px rgba(0, 0, 0, .3); }
 #hand .card.selected { transform: translateY(-16px); outline: 5px solid #f59e0b; }
-#hand .card.disabled { filter: grayscale(.55) opacity(.6); cursor: not-allowed; }
-#voliere .card.target { outline: 3px solid #22c55e; cursor: pointer; animation: pulse 1s infinite; }
-#voliere .card.target:hover { transform: translateY(-8px); }
+#voliere .card.clickable { cursor: pointer; }
+#voliere .card.clickable:hover { transform: translateY(-8px); }
 #voliere .card.selected { transform: translateY(-14px); outline: 5px solid #f59e0b; }
-@keyframes pulse { 50% { outline-color: #bbf7d0; } }
 
 /* ---------- Message + boutons d'action ---------- */
 #message {

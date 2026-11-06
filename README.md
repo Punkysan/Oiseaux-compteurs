@@ -22,7 +22,8 @@ aucun serveur requis).
 ## Règles implémentées (fidèles au document officiel)
 
 - Jeu de **40 cartes** : valeurs 1 à 10, en 4 couleurs (bleu, jaune, orange, violet).
-- **1 à 4 joueurs** : mode solo « défi Piou-Piou ! », ou 2-4 joueurs contre des robots.
+- **Solo « défi Piou-Piou ! » (1 joueur), ou toi contre 1 à 3 robots** (2 à 4 joueurs au total).
+- Aucune aide visuelle : les cartes permettant de faire un pli ne sont **pas mises en avant** ; un coup illégal est simplement refusé avec un message (comme au jeu physique).
 - Mise en place : 3 cartes en main, **4 cartes exposées** au centre (**la volière**), le reste en pioche.
   Si 3 ou 4 cartes « 10 » sont exposées, elles sont remises dans la pioche et 4 nouvelles cartes sont exposées.
 - **Faire un pli** : ramasser une carte de valeur identique (prise **prioritaire**), ou des cartes
