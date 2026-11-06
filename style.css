@@ -309,6 +309,15 @@ table.score-table tr.winner td { background: #fef9c3; font-weight: 800; }
   100% { transform: translateX(-50%) scale(1); }
 }
 
+/* ---------- Animations, piles et glisser-déposer ---------- */
+#hand-wrap { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.hand-col { display: flex; flex-direction: column; align-items: center; }
+.pile { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 56px; }
+.pile-count { font-size: .85rem; font-weight: 800; color: #0e7490; }
+.card.ghost { box-shadow: 0 12px 24px rgba(0, 0, 0, .35); }
+.card.dragging { opacity: .35; }
+#table-area.drop-zone #voliere { border-color: #f59e0b; border-style: solid; background: rgba(253, 224, 71, .35); }
+
 /* ---------- Petit écran ---------- */
 @media (max-width: 640px) {
   #topbar h1 { font-size: 1.05rem; }

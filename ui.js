@@ -6,6 +6,7 @@
 
   let state = null;
   let ui = { selHand: null, selTable: new Set() };
+  let draggedHandIndex = null;
   let soundOn = true;
   let audioCtx = null;
   let botBusy = false;
@@ -104,6 +105,7 @@
       ? '🐦 Partie solo lancée : réalise le plus de « Piou-Piou ! » possible !'
       : '🐦 Partie lancée avec ' + state.players.length + ' joueurs. Manche ' + state.roundNumber + '/' + state.match.rounds + '.');
     render();
+    animateDeal();
     maybeBotLoop();
   }
 
@@ -122,6 +124,7 @@
     const val = el('span', 'val', String(card.value));
     d.appendChild(tl); d.appendChild(bird); d.appendChild(val); d.appendChild(br);
     d.title = E.cardLabel(card);
+    if (card.id !== undefined) d.dataset.cardId = String(card.id);
     return d;
   }
 
@@ -156,10 +159,16 @@
     for (let i = 1; i < state.players.length; i++) {
       const p = state.players[i];
       const box = el('div', 'opponent' + (state.current === p.id && state.phase === 'play' ? ' active' : ''));
+      box.id = 'opp-' + p.id;
       box.appendChild(el('div', 'opp-name', (p.isBot ? '🤖 ' : '🧒 ') + p.name));
       const backs = el('div', 'backs');
       for (let k = 0; k < p.hand.length; k++) backs.appendChild(cardEl(null, { back: true, small: true }));
       box.appendChild(backs);
+      const pile = el('div', 'pile');
+      pile.id = 'opp-pile-' + p.id;
+      pile.appendChild(cardEl(null, { back: true, small: true }));
+      pile.appendChild(el('div', 'pile-count', '🂠 ' + p.captured.length));
+      box.appendChild(pile);
       const stats = el('div', 'stats');
       stats.appendChild(el('span', null, '🂠 ' + p.captured.length));
       stats.appendChild(el('span', null, '🐣 ' + p.piouPiou));
@@ -198,10 +207,21 @@
     const wrap = $('#hand');
     wrap.innerHTML = '';
     $('#hand-label').textContent = 'Ta main — ' + state.players[0].name;
+    const pile = $('#pile-human');
+    if (pile) {
+      pile.innerHTML = '';
+      pile.appendChild(cardEl(null, { back: true, small: true }));
+      pile.appendChild(el('div', 'pile-count', '🂠 ' + state.players[0].captured.length));
+    }
     const mine = humanTurn();
     state.players[0].hand.forEach((card, i) => {
       const d = cardEl(card);
-      if (mine) d.classList.add('clickable');
+      if (mine) {
+        d.classList.add('clickable');
+        d.draggable = true;
+        d.addEventListener('dragstart', (e) => onCardDragStart(e, i));
+        d.addEventListener('dragend', onCardDragEnd);
+      }
       if (ui.selHand === i) d.classList.add('selected');
       d.addEventListener('click', () => onHandClick(i));
       wrap.appendChild(d);
@@ -277,6 +297,7 @@
   }
 
   function doAction(action) {
+    const before = snapshotCardPositions();
     let ev;
     try {
       ev = E.playTurn(state, state.current, action);
@@ -290,6 +311,7 @@
     ui.selTable = new Set();
     handleEvents(ev);
     render();
+    animateEvents(ev, before);
     maybeBotLoop();
   }
 
@@ -464,19 +486,149 @@
     $('#modal-end').hidden = false;
   }
 
+  // ---------- Animations (les cartes se déplacent) ----------
+  function rectOf(node) { return node ? node.getBoundingClientRect() : null; }
+
+  function snapshotCardPositions() {
+    const map = {};
+    document.querySelectorAll('.card[data-card-id]').forEach((d) => {
+      map[d.dataset.cardId] = d.getBoundingClientRect();
+    });
+    return map;
+  }
+
+  function pileAnchor(pi) {
+    return pi === 0 ? $('#pile-human') : $('#opp-pile-' + pi);
+  }
+
+  function flyGhost(ghost, fromRect, toRect, delay, dur) {
+    if (!fromRect || !toRect) { ghost.remove(); return; }
+    dur = dur || 650;
+    ghost.removeAttribute('data-card-id');
+    ghost.classList.add('ghost');
+    Object.assign(ghost.style, {
+      position: 'fixed',
+      left: fromRect.left + 'px',
+      top: fromRect.top + 'px',
+      width: fromRect.width + 'px',
+      height: fromRect.height + 'px',
+      margin: '0',
+      zIndex: 300,
+      pointerEvents: 'none',
+    });
+    document.body.appendChild(ghost);
+    const dx = (toRect.left + toRect.width / 2) - (fromRect.left + fromRect.width / 2);
+    const dy = (toRect.top + toRect.height / 2) - (fromRect.top + fromRect.height / 2);
+    const s = Math.max(0.25, Math.min(1, toRect.width / Math.max(1, fromRect.width)));
+    setTimeout(() => {
+      ghost.style.transition = 'transform ' + dur + 'ms ease-in-out, opacity ' + dur + 'ms ease-in-out';
+      ghost.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + s + ')';
+      ghost.style.opacity = '0.85';
+      setTimeout(() => ghost.remove(), dur + 80);
+    }, delay || 0);
+  }
+
+  function flyCard(card, fromRect, toRect, delay, dur) {
+    flyGhost(cardEl(card), fromRect, toRect, delay, dur);
+  }
+
+  function flyBack(fromRect, toRect, delay, dur) {
+    flyGhost(cardEl(null, { back: true }), fromRect, toRect, delay, dur);
+  }
+
+  function animateEvents(ev, before) {
+    if (!state) return;
+    let delay = 0;
+    for (const e of ev) {
+      if (e.type === 'pli') {
+        const dest = rectOf(pileAnchor(e.player));
+        const fromPlayed = before[String(e.played.id)];
+        if (fromPlayed) flyCard(e.played, fromPlayed, dest, delay);
+        e.captured.forEach((c, k) => {
+          const from = before[String(c.id)];
+          if (from) flyCard(c, from, dest, delay + 140 + k * 90);
+        });
+        delay += 420;
+      } else if (e.type === 'expose') {
+        const from = before[String(e.card.id)];
+        const dest = rectOf($('#voliere'));
+        if (from) flyCard(e.card, from, dest, delay);
+        delay += 320;
+      } else if (e.type === 'draw') {
+        const from = rectOf($('#pioche'));
+        const dest = e.player === 0 ? rectOf($('#hand')) : rectOf($('#opp-' + e.player));
+        if (from && dest) flyBack(from, dest, delay, 500);
+        delay += 160;
+      }
+    }
+  }
+
+  function animateDeal() {
+    const from = rectOf($('#pioche'));
+    const vol = rectOf($('#voliere'));
+    if (!from || !vol) return;
+    state.players.forEach((p, i) => {
+      const dest = i === 0 ? rectOf($('#hand')) : rectOf($('#opp-' + i));
+      if (!dest) return;
+      for (let k = 0; k < p.hand.length; k++) flyBack(from, dest, i * 140 + k * 110, 600);
+    });
+    state.table.forEach((c, k) => flyCard(c, from, vol, 450 + k * 150, 600));
+  }
+
+  // ---------- Glisser-déposer : poser une carte dans la volière ----------
+  function onCardDragStart(e, i) {
+    if (!humanTurn()) { e.preventDefault(); return; }
+    draggedHandIndex = i;
+    try {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(i));
+    } catch (err) { /* environnements de test sans dataTransfer */ }
+    if (e.target && e.target.classList) e.target.classList.add('dragging');
+  }
+
+  function onCardDragEnd(e) {
+    draggedHandIndex = null;
+    if (e.target && e.target.classList) e.target.classList.remove('dragging');
+    const dz = $('#table-area');
+    if (dz) dz.classList.remove('drop-zone');
+  }
+
+  function initDropZone() {
+    const dz = $('#table-area');
+    if (!dz) return;
+    dz.addEventListener('dragover', (e) => {
+      if (draggedHandIndex !== null && humanTurn()) {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+        dz.classList.add('drop-zone');
+      }
+    });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drop-zone'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dz.classList.remove('drop-zone');
+      const i = draggedHandIndex;
+      draggedHandIndex = null;
+      if (i === null || !humanTurn()) return;
+      doAction({ type: 'expose', handIndex: i });
+    });
+  }
+
   // ---------- Boucle des robots ----------
   async function maybeBotLoop() {
     if (botBusy || !state) return;
     botBusy = true;
     while (state && state.phase === 'play' && state.players[state.current].isBot) {
       render();
-      await sleep(850);
+      await sleep(1100);
       if (!state || state.phase !== 'play' || !state.players[state.current].isBot) break;
+      const before = snapshotCardPositions();
       const action = E.botChooseAction(state, state.current, state.rng);
       const ev = E.playTurn(state, state.current, action);
       handleEvents(ev);
       render();
-      await sleep(350);
+      animateEvents(ev, before);
+      await sleep(550);
     }
     botBusy = false;
     render();
@@ -518,6 +670,7 @@
     $('#modal-rules').addEventListener('click', (e) => {
       if (e.target === $('#modal-rules')) $('#modal-rules').hidden = true;
     });
+    initDropZone();
     showScreen('menu');
     // Poignée de débogage / test (lecture seule).
     window.OiseauUI = { getState: function () { return state; } };
