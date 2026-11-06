@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oiseau, compte ! — version numérique</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%A6%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="topbar">
+  <h1>🐦 Oiseau, compte !</h1>
+  <div class="top-actions">
+    <button id="btn-sound" class="chip-btn" title="Activer / couper le son">🔊</button>
+    <button id="btn-rules" class="chip-btn" title="Afficher les règles du jeu">❓ Règles</button>
+    <button id="btn-new" class="chip-btn" title="Retour au menu">🔄 Nouvelle partie</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ Menu de configuration ============ -->
+  <section id="screen-menu" class="screen">
+    <div class="panel menu-panel">
+      <h2>Nouvelle partie</h2>
+
+      <div class="field">
+        <label for="cfg-players">Nombre de joueurs</label>
+        <select id="cfg-players">
+          <option value="1">1 joueur — défi « Piou-Piou ! » (solo)</option>
+          <option value="2" selected>2 joueurs (contre 1 robot)</option>
+          <option value="3">3 joueurs (contre 2 robots)</option>
+          <option value="4">4 joueurs (contre 3 robots)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="cfg-name">Ton nom</label>
+        <input id="cfg-name" type="text" value="Toi" maxlength="16" autocomplete="off">
+      </div>
+
+      <div class="field" id="field-rounds">
+        <label for="cfg-rounds">Durée de la partie</label>
+        <select id="cfg-rounds">
+          <option value="1" selected>1 manche</option>
+          <option value="3">3 manches</option>
+          <option value="5">5 manches</option>
+        </select>
+      </div>
+
+      <div class="field" id="field-matchmode">
+        <label for="cfg-matchmode">Vainqueur quand la partie est en plusieurs manches</label>
+        <select id="cfg-matchmode">
+          <option value="manches" selected>celui qui a remporté le plus de manches</option>
+          <option value="cumul">celui qui a le plus de points au total (cumul des manches)</option>
+        </select>
+      </div>
+
+      <fieldset>
+        <legend>Variantes sur les conditions de prise (facultatives)</legend>
+        <label class="check"><input type="checkbox" id="v-parity"> Variante 2 : ne ramasser que des cartes toutes paires ou toutes impaires</label>
+        <label class="check"><input type="checkbox" id="v-sub"> Variante 3 : soustraction (ex. jouer 8 ramasse 10 et 2, car 8 = 10 − 2)</label>
+        <label class="check"><input type="checkbox" id="v-comp10"> Variante 4 : carte jouée + cartes ramassées = 10 rapporte 1 point</label>
+        <label class="check"><input type="checkbox" id="v-nodraw"> Variante 5 : on ne repiohe pas en fin de tour (redistribution de 3 cartes quand une main est vide)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Score et variantes de victoire</legend>
+        <label class="check"><input type="checkbox" id="v-pioupoint"> Variante 1 : chaque « Piou-Piou ! » rapporte 1 point bonus</label>
+        <div class="field" id="field-scoring">
+          <label for="cfg-scoring">Déterminer le vainqueur (2 à 4 joueurs)</label>
+          <select id="cfg-scoring">
+            <option value="cards" selected>Règle de base : le plus de cartes ramassées</option>
+            <option value="le5">Variante 6 : le plus de cartes de valeur inférieure ou égale au seuil</option>
+            <option value="piles10">Variante 7 : le plus de piles de cartes dont la somme vaut 10</option>
+            <option value="sum">Variante 8 : la plus grande somme des valeurs ramassées</option>
+            <option value="suite">Variante 9a : la plus grande suite (toutes couleurs confondues)</option>
+            <option value="suiteMono">Variante 9b : la plus grande suite de cartes de même couleur</option>
+            <option value="points10">Variante 10 : 1 point par paire de même valeur + 1 point par couleur majoritaire</option>
+            <option value="pointsCarres">Variante 10 enrichie : 1 / 4 / 9 / 16 points (seule, paire, brelan, carré)</option>
+          </select>
+        </div>
+        <div class="field" id="field-seuil" hidden>
+          <label for="cfg-seuil">Seuil de la variante 6</label>
+          <input id="cfg-seuil" type="number" min="1" max="10" value="5">
+        </div>
+      </fieldset>
+
+      <button id="btn-play" class="big-btn">🐦 Jouer !</button>
+      <p class="hint">Version numérique du jeu « Oiseau, compte ! » (Ministère de l'Éducation nationale, « Oiseaux-compteurs », période 3 à 5). Fonctionne hors-ligne : ouvre simplement ce fichier dans un navigateur.</p>
+    </div>
+  </section>
+
+  <!-- ============ Écran de jeu ============ -->
+  <section id="screen-game" class="screen" hidden>
+    <div id="scorebar"></div>
+    <div id="opponents"></div>
+    <div id="table-area">
+      <div id="pioche" title="La pioche"></div>
+      <div id="voliere-wrap">
+        <div class="voliere-label">La volière (cartes exposées au centre)</div>
+        <div id="voliere"></div>
+      </div>
+    </div>
+    <div id="message"></div>
+    <div id="hand-wrap">
+      <div class="hand-label" id="hand-label">Ta main</div>
+      <div id="hand"></div>
+    </div>
+    <div id="log"></div>
+  </section>
+
+</main>
+
+<!-- ============ Modale : règles ============ -->
+<div id="modal-rules" class="modal" hidden>
+  <div class="panel modal-panel">
+    <h2>🐦 Règles du jeu « Oiseau, compte ! »</h2>
+    <div id="rules-active"></div>
+    <ol class="rules-list">
+      <li><strong>Matériel :</strong> 40 cartes — les valeurs 1 à 10, chacune en 4 couleurs (bleu, jaune, orange, violet).</li>
+      <li><strong>Mise en place :</strong> chaque joueur reçoit <strong>3 cartes</strong> en main ; <strong>4 cartes</strong> sont exposées au centre de la table : <strong>la volière</strong>. Le reste forme la pioche. Si 3 ou 4 cartes « 10 » sont exposées, on les remet dans la pioche, on mélange et on expose 4 nouvelles cartes.</li>
+      <li><strong>Déroulement :</strong> à son tour, le joueur choisit une de ses 3 cartes pour <strong>faire un pli</strong> (ramasser des cartes de la volière) :
+        <ul>
+          <li>ramasser une carte exposée de <strong>valeur identique</strong> à la carte jouée (cette prise est <strong>prioritaire</strong>) ;</li>
+          <li>ou ramasser des cartes exposées dont la <strong>somme des valeurs est égale</strong> à la valeur de la carte jouée.</li>
+        </ul>
+      </li>
+      <li>Le pli réussi : les cartes ramassées + la carte jouée sont posées à côté du joueur. <strong>Si le joueur ramasse toutes les cartes de la volière, il dit « Piou-Piou ! »</strong></li>
+      <li>Si aucun pli n'est possible, le joueur <strong>pose une de ses cartes</strong> dans la volière.</li>
+      <li>En fin de tour, le joueur <strong>repiohe une carte</strong> pour avoir de nouveau 3 cartes en main. Si la volière est vide au début de son tour, le joueur suivant pose une carte au centre.</li>
+      <li><strong>Fin de la manche :</strong> quand la pioche est épuisée, on joue jusqu'à ce que les mains soient vides. Les cartes restées dans la volière ne comptent pas.</li>
+      <li><strong>Vainqueur :</strong> à 2-4 joueurs, celui qui a le plus de cartes (ou la variante de victoire choisie). En solo, le défi est de réaliser le plus de « Piou-Piou ! ».</li>
+    </ol>
+    <button class="big-btn" id="btn-close-rules">J'ai compris !</button>
+  </div>
+</div>
+
+<!-- ============ Modale : fin de manche / de match ============ -->
+<div id="modal-end" class="modal" hidden>
+  <div class="panel modal-panel">
+    <h2 id="end-title">Fin de la manche</h2>
+    <div id="end-body"></div>
+    <div id="end-buttons" class="end-buttons"></div>
+  </div>
+</div>
+
+<div id="piou-banner" hidden></div>
+
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

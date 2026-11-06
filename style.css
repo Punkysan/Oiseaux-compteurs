@@ -1,0 +1,319 @@
+:root {
+  --bleu: #2f6fed;
+  --jaune: #eab308;
+  --orange: #f2762e;
+  --violet: #8b5cf6;
+  --ink: #1f2937;
+  --sky1: #a5d8ff;
+  --sky2: #e8f7ff;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: "Comic Sans MS", "Chalkboard SE", "Segoe UI", system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--sky1) 0%, var(--sky2) 60%, #f0fdf4 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ---------- Barre du haut ---------- */
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #0e7490;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+#topbar h1 { font-size: 1.35rem; margin: 0; text-shadow: 1px 1px 0 rgba(0,0,0,.3); }
+.top-actions { display: flex; gap: 8px; }
+.chip-btn {
+  font-family: inherit;
+  font-size: .95rem;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #ecfeff;
+  color: #155e75;
+  font-weight: 700;
+  cursor: pointer;
+}
+.chip-btn:hover { background: #fff; }
+
+/* ---------- Écrans ---------- */
+.screen { padding: 14px; }
+#screen-menu { display: flex; justify-content: center; }
+
+.panel {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 24px rgba(2, 44, 60, .18);
+}
+.menu-panel { max-width: 680px; width: 100%; margin-top: 12px; }
+.menu-panel h2 { margin-top: 0; color: #0e7490; }
+
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.field label { font-weight: 700; font-size: .95rem; }
+.field select, .field input {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 10px;
+  border: 2px solid #bae6fd;
+  border-radius: 10px;
+  background: #f0f9ff;
+  color: var(--ink);
+}
+fieldset {
+  border: 2px solid #bae6fd;
+  border-radius: 12px;
+  margin: 14px 0;
+  padding: 10px 14px;
+}
+legend { font-weight: 700; color: #0e7490; padding: 0 6px; }
+label.check { display: block; margin: 7px 0; font-size: .95rem; cursor: pointer; }
+label.check input { margin-right: 8px; transform: scale(1.2); }
+
+.big-btn {
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 30px;
+  background: #f59e0b;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b45309;
+  transition: transform .1s;
+  margin-top: 8px;
+}
+.big-btn:hover { transform: scale(1.05); }
+.big-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b45309; }
+.big-btn.secondary { background: #0e7490; box-shadow: 0 4px 0 #155e75; }
+.big-btn:disabled { background: #9ca3af; box-shadow: 0 4px 0 #6b7280; cursor: not-allowed; transform: none; }
+
+.hint { font-size: .82rem; color: #64748b; margin-bottom: 0; }
+
+/* ---------- Barre des scores ---------- */
+#scorebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.score-chip {
+  background: #fff;
+  border: 2px solid #bae6fd;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: .95rem;
+  font-weight: 700;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.score-chip.active { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 0 0 3px rgba(245, 158, 11, .25); }
+.score-chip.out { opacity: .55; }
+.score-chip .round-tag { color: #0e7490; }
+
+/* ---------- Adversaires ---------- */
+#opponents { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 10px; }
+.opponent {
+  background: rgba(255, 255, 255, .9);
+  border: 2px solid #bae6fd;
+  border-radius: 14px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 130px;
+}
+.opponent.active { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .25); }
+.opponent .opp-name { font-weight: 800; margin-bottom: 4px; }
+.opponent .backs { display: flex; gap: 3px; justify-content: center; margin-bottom: 5px; }
+.opponent .stats { font-size: .85rem; color: #334155; display: flex; gap: 10px; justify-content: center; }
+
+/* ---------- Table (pioche + volière) ---------- */
+#table-area { display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+#pioche { text-align: center; }
+#pioche .pioche-count { font-size: .8rem; font-weight: 700; color: #0e7490; margin-top: 4px; }
+#voliere-wrap { flex: 1; min-width: 280px; max-width: 760px; }
+.voliere-label, .hand-label { text-align: center; font-weight: 800; color: #0e7490; margin-bottom: 6px; font-size: .95rem; }
+#voliere {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 140px;
+  padding: 14px;
+  background: rgba(255, 255, 255, .55);
+  border: 3px dashed #7dd3fc;
+  border-radius: 16px;
+}
+#voliere:empty::after { content: "La volière est vide…"; color: #64748b; font-size: .9rem; }
+
+/* ---------- Cartes ---------- */
+.card {
+  width: 84px;
+  height: 118px;
+  border-radius: 12px;
+  position: relative;
+  background: #fff;
+  border: 4px solid #999;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: transform .12s ease;
+  flex: 0 0 auto;
+}
+.card .val { font-size: 2.1rem; font-weight: 800; }
+.card .bird { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-size: 1.05rem; }
+.card .corner { position: absolute; font-size: .78rem; font-weight: 800; }
+.card .corner.tl { top: 3px; left: 6px; }
+.card .corner.br { bottom: 3px; right: 6px; transform: rotate(180deg); }
+.card.c-bleu   { border-color: var(--bleu);   background: linear-gradient(160deg, #dbeafe, #93c5fd); }
+.card.c-jaune  { border-color: var(--jaune);  background: linear-gradient(160deg, #fef9c3, #fde047); }
+.card.c-orange { border-color: var(--orange); background: linear-gradient(160deg, #ffedd5, #fdba74); }
+.card.c-violet { border-color: var(--violet); background: linear-gradient(160deg, #ede9fe, #c4b5fd); }
+.card.back {
+  border-color: #134e4a;
+  background: repeating-linear-gradient(45deg, #0f766e 0 8px, #115e59 8px 16px);
+}
+.card.back .back-bird { font-size: 1.5rem; }
+.card.small { width: 42px; height: 60px; border-width: 3px; border-radius: 8px; }
+.card.small .val { font-size: 1.05rem; }
+.card.small .bird { font-size: .65rem; top: 2px; }
+.card.small .corner { display: none; }
+.card.small.back .back-bird { font-size: .85rem; }
+
+#hand { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+#hand .card { width: 104px; height: 146px; }
+#hand .card .val { font-size: 2.6rem; }
+#hand .card.playable { cursor: pointer; }
+#hand .card.playable:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 8px 14px rgba(0, 0, 0, .3); }
+#hand .card.selected { transform: translateY(-16px); outline: 5px solid #f59e0b; }
+#hand .card.disabled { filter: grayscale(.55) opacity(.6); cursor: not-allowed; }
+#voliere .card.target { outline: 3px solid #22c55e; cursor: pointer; animation: pulse 1s infinite; }
+#voliere .card.target:hover { transform: translateY(-8px); }
+#voliere .card.selected { transform: translateY(-14px); outline: 5px solid #f59e0b; }
+@keyframes pulse { 50% { outline-color: #bbf7d0; } }
+
+/* ---------- Message + boutons d'action ---------- */
+#message {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-height: 2.2em;
+  margin: 6px auto 10px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+#message .actions { display: flex; gap: 10px; }
+.action-btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  cursor: pointer;
+  color: #fff;
+  background: #16a34a;
+  box-shadow: 0 3px 0 #15803d;
+}
+.action-btn:disabled { background: #9ca3af; box-shadow: 0 3px 0 #6b7280; cursor: not-allowed; }
+.action-btn.cancel { background: #64748b; box-shadow: 0 3px 0 #475569; }
+#message.flash { color: #dc2626; }
+
+/* ---------- Journal ---------- */
+#log {
+  max-width: 760px;
+  margin: 10px auto 20px;
+  max-height: 110px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, .65);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: .82rem;
+  color: #334155;
+}
+#log .log-line { padding: 1px 0; border-bottom: 1px dashed #e2e8f0; }
+#log .log-line:last-child { border-bottom: none; }
+
+/* ---------- Modales ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.modal[hidden] { display: none; }
+.modal-panel { max-width: 640px; width: 100%; max-height: 88vh; overflow-y: auto; }
+.modal-panel h2 { margin-top: 0; color: #0e7490; }
+.rules-list { line-height: 1.45; font-size: .95rem; padding-left: 20px; }
+.rules-list li { margin-bottom: 8px; }
+.rules-list ul { margin: 4px 0 0; }
+#rules-active { background: #fffbeb; border: 2px solid #fde68a; border-radius: 10px; padding: 8px 12px; font-size: .88rem; margin-bottom: 10px; }
+#rules-active:empty { display: none; }
+
+.end-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+table.score-table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: .95rem; }
+table.score-table th, table.score-table td { border: 1px solid #e2e8f0; padding: 6px 10px; text-align: left; }
+table.score-table th { background: #f0f9ff; }
+table.score-table tr.winner td { background: #fef9c3; font-weight: 800; }
+.solo-score { font-size: 2rem; font-weight: 800; text-align: center; color: #b45309; margin: 10px 0; }
+.match-block { margin-top: 12px; border-top: 2px dashed #bae6fd; padding-top: 8px; }
+
+/* ---------- Bannière Piou-Piou ---------- */
+#piou-banner {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(160deg, #fde047, #f59e0b);
+  color: #7c2d12;
+  font-size: 2.2rem;
+  font-weight: 900;
+  padding: 18px 36px;
+  border-radius: 999px;
+  border: 5px solid #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  z-index: 100;
+  animation: bounce .5s ease;
+  text-align: center;
+}
+#piou-banner[hidden] { display: none; }
+@keyframes bounce {
+  0% { transform: translateX(-50%) scale(.3); }
+  60% { transform: translateX(-50%) scale(1.15); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ---------- Petit écran ---------- */
+@media (max-width: 640px) {
+  #topbar h1 { font-size: 1.05rem; }
+  .card { width: 66px; height: 94px; }
+  #hand .card { width: 84px; height: 118px; }
+  #hand .card .val { font-size: 2rem; }
+  .card .val { font-size: 1.6rem; }
+  #piou-banner { font-size: 1.4rem; padding: 12px 22px; }
+}
