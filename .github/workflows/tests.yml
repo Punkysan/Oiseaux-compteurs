@@ -17,5 +17,7 @@ jobs:
           node --check engine.js
           node --check ui.js
           node --check test.js
-      - name: Tests du moteur (node test.js)
+      - name: Tests du moteur « Oiseau, compte ! » (node test.js)
         run: node test.js
+      - name: Tests du moteur « Nombre mystère » (node nombre-mystere/test.js)
+        run: node nombre-mystere/test.js

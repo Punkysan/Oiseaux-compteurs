@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Nombre mystère — jeu à 2 sur une tablette</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="topbar">
+  <h1>❓ Nombre mystère</h1>
+  <div class="top-actions">
+    <button id="btn-flip" class="chip-btn" title="Retourner l'écran pour le joueur en face">🔄 Retourner</button>
+    <button id="btn-sound" class="chip-btn" title="Activer / couper le son">🔊</button>
+    <button id="btn-rules" class="chip-btn" title="Règles du jeu">❓ Règles</button>
+    <button id="btn-new" class="chip-btn" title="Retour au menu">🔄 Nouvelle partie</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ Menu ============ -->
+  <section id="screen-menu" class="screen">
+    <div class="panel menu-panel">
+      <h2>Nouvelle partie</h2>
+
+      <div class="field">
+        <label for="cfg-mode">Mode de jeu</label>
+        <select id="cfg-mode">
+          <option value="2h" selected>2 joueurs sur cette tablette (face à face)</option>
+          <option value="3h">3 joueurs sur cette tablette</option>
+          <option value="4h">4 joueurs sur cette tablette</option>
+          <option value="r2">Toi contre 1 robot</option>
+          <option value="r3">Toi contre 2 robots</option>
+          <option value="r4">Toi contre 3 robots</option>
+        </select>
+      </div>
+
+      <div class="field" id="field-names" hidden>
+        <label for="cfg-names">Prénoms des joueurs (séparés par des virgules)</label>
+        <input id="cfg-names" type="text" placeholder="Léa, Tom" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="cfg-rounds">Nombre de manches</label>
+        <select id="cfg-rounds">
+          <option value="1">1 manche</option>
+          <option value="3" selected>3 manches</option>
+          <option value="5">5 manches</option>
+        </select>
+      </div>
+
+      <div class="field" id="field-difficulty" hidden>
+        <label for="cfg-difficulty">Niveau des robots</label>
+        <select id="cfg-difficulty">
+          <option value="easy" selected>Facile — pour les 6-7 ans (coups au hasard)</option>
+          <option value="normal">Normal — toujours la bonne étiquette</option>
+        </select>
+      </div>
+
+      <button id="btn-play" class="big-btn">❓ Jouer !</button>
+      <p class="hint">Grille 3×3 : 8 dessins à compter + une case « ❓ ». Les étiquettes 1 à 9 ne servent qu'une seule fois. La case « ❓ » reçoit le nombre restant (le nombre mystère, 2 points). Fonctionne hors-ligne.</p>
+    </div>
+  </section>
+
+  <!-- ============ Écran de jeu ============ -->
+  <section id="screen-game" class="screen" hidden>
+    <div id="game-flip">
+      <div id="scorebar"></div>
+      <div id="board-wrap">
+        <div id="grid"></div>
+      </div>
+      <div id="message"></div>
+      <div id="pad-wrap">
+        <div class="pad-label">Étiquettes (1 à 9, chacune une seule fois)</div>
+        <div id="pad"></div>
+      </div>
+      <div id="log"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ Modale règles ============ -->
+<div id="modal-rules" class="modal" hidden>
+  <div class="panel modal-panel">
+    <h2>❓ Règles de « Nombre mystère »</h2>
+    <ol class="rules-list">
+      <li>La grille compte <strong>9 cases (3×3)</strong> : <strong>8 dessins</strong> et une case <strong>« ❓ »</strong>.</li>
+      <li>Chaque dessin représente une <strong>quantité</strong> : compte les objets dessinés et pose l'<strong>étiquette-nombre</strong> correspondante sur la case.</li>
+      <li>Les nombres de <strong>1 à 9</strong> ne servent <strong>qu'une seule fois</strong> chacun.</li>
+      <li>Le <strong>nombre mystère</strong> est l'étiquette restante : elle va sur la case « ❓ » et rapporte <strong>2 points</strong> (les autres : 1 point).</li>
+      <li>À son tour, le joueur choisit une étiquette (1-9 encore disponible) puis une case encore vide. Bonne étiquette = posée ; mauvaise = on passe la main.</li>
+      <li>La manche se termine quand les 9 cases sont étiquetées. Vainqueur du match : le plus grand total de points sur toutes les manches.</li>
+      <li>À 2 sur la même tablette : chacun joue à son tour ; entre les tours, passe la tablette (écran « Passe la tablette à… ») et utilise 🔄 <strong>Retourner</strong> pour que le joueur en face voie l'écran dans le bon sens.</li>
+    </ol>
+    <button class="big-btn" id="btn-close-rules">J'ai compris !</button>
+  </div>
+</div>
+
+<!-- ============ Modale fin ============ -->
+<div id="modal-end" class="modal" hidden>
+  <div class="panel modal-panel">
+    <h2 id="end-title">Fin de la manche</h2>
+    <div id="end-body"></div>
+    <div id="end-buttons" class="end-buttons"></div>
+  </div>
+</div>
+
+<div id="myst-banner" hidden></div>
+
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

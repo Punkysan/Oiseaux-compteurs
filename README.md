@@ -1,3 +1,12 @@
+# 🐦 Oiseaux-compteurs — jeux numériques
+
+Deux jeux autonomes (hors-ligne) :
+
+- **« Oiseau, compte ! »** (à la racine de ce dépôt) — voir ci-dessous.
+- **[❓ Nombre mystère](nombre-mystere/)** : grille 3×3, **jouable à 2 sur une seule tablette** (face à face).
+
+---
+
 # 🐦 Oiseau, compte ! — version numérique
 
 Version web jouable et autonome (aucune dépendance, fonctionne **hors-ligne**) du jeu de cartes
