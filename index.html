@@ -32,12 +32,20 @@
           <option value="2" selected>Toi contre 1 robot</option>
           <option value="3">Toi contre 2 robots</option>
           <option value="4">Toi contre 3 robots</option>
+          <option value="2h">2 joueurs humains sur cette tablette</option>
+          <option value="3h">3 joueurs humains sur cette tablette</option>
+          <option value="4h">4 joueurs humains sur cette tablette</option>
         </select>
       </div>
 
-      <div class="field">
+      <div class="field" id="field-name">
         <label for="cfg-name">Ton nom</label>
         <input id="cfg-name" type="text" value="Toi" maxlength="16" autocomplete="off">
+      </div>
+
+      <div class="field" id="field-names" hidden>
+        <label for="cfg-names">Noms des joueurs (séparés par des virgules)</label>
+        <input id="cfg-names" type="text" placeholder="Léa, Tom" autocomplete="off">
       </div>
 
       <div class="field" id="field-difficulty">

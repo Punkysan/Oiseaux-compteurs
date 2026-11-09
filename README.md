@@ -28,6 +28,7 @@ aucun serveur requis).
 - **Justification** : quand un robot remporte une manche (ou le match), ses cartes ramassées sont affichées dans la fenêtre de fin.
 - **Animations** : les cartes se déplacent à l'écran (distribution, pose dans la volière, plis vers les piles, pioches) — on voit aussi les robots jouer leurs cartes.
 - **Glisser-déposer** : pour poser une carte dans la volière, glisse-la depuis ta main jusqu'à la volière (le clic « Poser cette carte » reste disponible).
+- **Hotseat (une seule tablette)** : « 2/3/4 joueurs humains sur cette tablette » — chacun joue à son tour ; entre les tours, un écran « 📱 Passe la tablette à… » cache la main (bouton « 👀 Voir ma main »), avec champ pour saisir les prénoms.
 - Mise en place : 3 cartes en main, **4 cartes exposées** au centre (**la volière**), le reste en pioche.
   Si 3 ou 4 cartes « 10 » sont exposées, elles sont remises dans la pioche et 4 nouvelles cartes sont exposées.
 - **Faire un pli** : ramasser une carte de valeur identique (prise **prioritaire**), ou des cartes

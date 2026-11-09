@@ -144,7 +144,7 @@
     const names = (opts.names && opts.names.length ? opts.names.slice(0, n) : defaultNames);
     const humanIndex = opts.humanIndex !== undefined ? opts.humanIndex : 0;
     const players = names.map((name, i) => ({
-      id: i, name, isBot: i !== humanIndex,
+      id: i, name, isBot: opts.allHuman ? false : i !== humanIndex,
       hand: [], captured: [], piouPiou: 0, comp10: 0, out: false,
     }));
     const v = opts.variants || {};

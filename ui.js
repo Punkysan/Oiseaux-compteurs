@@ -21,8 +21,19 @@
   }
   function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
   function pname(i) { return state.players[i].name; }
+  function currentIsHuman() {
+    return state && state.phase === 'play' && state.current >= 0 && !state.players[state.current].isBot;
+  }
+  function humanCount() {
+    return state ? state.players.filter((p) => !p.isBot).length : 0;
+  }
+  // Vrai quand c'est à un humain ET que sa main est révélée (hotseat : appui sur « Voir ma main »).
   function humanTurn() {
-    return state && state.phase === 'play' && state.current === 0 && !state.players[0].isBot;
+    if (!currentIsHuman()) return false;
+    return humanCount() <= 1 || ui.revealed === state.current;
+  }
+  function needsReveal() {
+    return currentIsHuman() && humanCount() > 1 && ui.revealed !== state.current;
   }
 
   // ---------- Sons (WebAudio, aucun fichier externe) ----------
@@ -57,22 +68,35 @@
 
   // ---------- Menu ----------
   function updateMenuVisibility() {
-    const solo = $('#cfg-players').value === '1';
+    const raw = $('#cfg-players').value;
+    const solo = raw === '1';
+    const hotseat = raw.endsWith('h');
     $('#field-rounds').hidden = solo;
     $('#field-matchmode').hidden = solo;
     $('#field-scoring').hidden = solo;
-    $('#field-difficulty').hidden = solo;
+    $('#field-difficulty').hidden = solo || hotseat;
+    $('#field-name').hidden = hotseat;
+    $('#field-names').hidden = !hotseat;
     $('#field-seuil').hidden = solo || $('#cfg-scoring').value !== 'le5';
   }
 
   function readConfig() {
-    const numPlayers = parseInt($('#cfg-players').value, 10);
-    const name = $('#cfg-name').value.trim() || 'Toi';
-    const names = [name];
-    for (let i = 1; i < numPlayers; i++) names.push('Robot ' + i);
+    const raw = $('#cfg-players').value;
+    const allHuman = raw.endsWith('h');
+    const numPlayers = parseInt(raw, 10);
+    let names;
+    if (allHuman) {
+      names = $('#cfg-names').value.split(',').map((s) => s.trim()).filter(Boolean);
+      while (names.length < numPlayers) names.push('Joueur ' + (names.length + 1));
+      names = names.slice(0, numPlayers);
+    } else {
+      names = [$('#cfg-name').value.trim() || 'Toi'];
+      for (let i = 1; i < numPlayers; i++) names.push('Robot ' + i);
+    }
     return {
       numPlayers,
       names,
+      allHuman,
       humanIndex: 0,
       variants: {
         parity: $('#v-parity').checked,
@@ -97,7 +121,7 @@
   function startGame(cfg) {
     lastCfg = cfg;
     state = E.newGame(Object.assign({}, cfg, { rng: Math.random }));
-    ui = { selHand: null, selTable: new Set() };
+    ui = { selHand: null, selTable: new Set(), revealed: null };
     $('#log').innerHTML = '';
     showScreen('game');
     const solo = state.solo;
@@ -156,7 +180,8 @@
   function renderOpponents() {
     const wrap = $('#opponents');
     wrap.innerHTML = '';
-    for (let i = 1; i < state.players.length; i++) {
+    for (let i = 0; i < state.players.length; i++) {
+      if (i === state.current) continue; // le joueur courant a sa zone en bas
       const p = state.players[i];
       const box = el('div', 'opponent' + (state.current === p.id && state.phase === 'play' ? ' active' : ''));
       box.id = 'opp-' + p.id;
@@ -175,11 +200,6 @@
       box.appendChild(stats);
       wrap.appendChild(box);
     }
-  }
-
-  function currentLegal() {
-    if (!humanTurn()) return null;
-    return E.legalPlaysForPlayer(state, 0);
   }
 
   function renderTable() {
@@ -206,30 +226,35 @@
   function renderHand() {
     const wrap = $('#hand');
     wrap.innerHTML = '';
-    $('#hand-label').textContent = 'Ta main — ' + state.players[0].name;
+    const cur = state.players[state.current];
+    $('#hand-label').textContent = state.phase === 'play' && cur ? 'Main de ' + cur.name : 'Main';
     const pile = $('#pile-human');
     if (pile) {
       pile.innerHTML = '';
       pile.appendChild(cardEl(null, { back: true, small: true }));
-      pile.appendChild(el('div', 'pile-count', '🂠 ' + state.players[0].captured.length));
+      pile.appendChild(el('div', 'pile-count', '🂠 ' + (cur ? cur.captured.length : 0)));
+      pile.title = cur ? 'Cartes ramassées par ' + cur.name : '';
     }
     const mine = humanTurn();
-    state.players[0].hand.forEach((card, i) => {
-      const d = cardEl(card);
-      if (mine) {
+    const hand = state.phase === 'play' && cur ? cur.hand : [];
+    if (!mine) {
+      for (let k = 0; k < hand.length; k++) wrap.appendChild(cardEl(null, { back: true }));
+    } else {
+      hand.forEach((card, i) => {
+        const d = cardEl(card);
         d.classList.add('clickable');
         d.draggable = true;
         d.addEventListener('dragstart', (e) => onCardDragStart(e, i));
         d.addEventListener('dragend', onCardDragEnd);
-      }
-      if (ui.selHand === i) d.classList.add('selected');
-      d.addEventListener('click', () => onHandClick(i));
-      wrap.appendChild(d);
-    });
-    renderMessage(mine ? E.legalPlaysForPlayer(state, 0) : null);
+        if (ui.selHand === i) d.classList.add('selected');
+        d.addEventListener('click', () => onHandClick(i));
+        wrap.appendChild(d);
+      });
+    }
+    renderMessage();
   }
 
-  function renderMessage(legal) {
+  function renderMessage() {
     const box = $('#message');
     box.innerHTML = '';
     box.classList.remove('flash');
@@ -243,12 +268,19 @@
       box.appendChild(el('div', null, '🤖 ' + cur.name + ' réfléchit…'));
       return;
     }
-    if (!legal) return;
+    if (needsReveal()) {
+      box.appendChild(el('div', null, '📱 Passe la tablette à ' + cur.name + '…'));
+      const b = el('button', 'action-btn reveal-btn', '👀 Voir ma main');
+      b.addEventListener('click', () => { ui.revealed = state.current; render(); });
+      box.appendChild(b);
+      return;
+    }
+    const legal = E.legalPlaysForPlayer(state, state.current);
     if (ui.selHand === null) {
       box.appendChild(el('div', null, 'À toi de jouer, ' + cur.name + ' ! Choisis une carte en main.'));
       return;
     }
-    const card = state.players[0].hand[ui.selHand];
+    const card = cur.hand[ui.selHand];
     box.appendChild(el('div', null,
       'Carte choisie : ' + E.cardLabel(card) + '. Sélectionne des cartes de la volière à ramasser avec cette carte et valide le pli — ou pose la carte dans la volière.'));
     const actions = el('div', 'actions');
@@ -268,7 +300,7 @@
   // ---------- Interactions ----------
   function onHandClick(i) {
     if (!humanTurn()) return;
-    const legal = E.legalPlaysForPlayer(state, 0);
+    const legal = E.legalPlaysForPlayer(state, state.current);
     const pl = legal.plis.find((p) => p.handIndex === i);
     if (pl && pl.options.length === 1 && pl.options[0].length === 1) {
       doAction({ type: 'pli', handIndex: i, tableIndices: pl.options[0] });
@@ -309,6 +341,7 @@
     }
     ui.selHand = null;
     ui.selTable = new Set();
+    ui.revealed = null;
     handleEvents(ev);
     render();
     animateEvents(ev, before);
@@ -463,8 +496,10 @@
       next.addEventListener('click', () => {
         $('#modal-end').hidden = true;
         E.nextRound(state);
+        ui = { selHand: null, selTable: new Set(), revealed: null };
         log('🎬 Manche ' + state.roundNumber + '/' + state.match.rounds + ' — le donneur est ' + state.players[state.dealer].name + '.');
         render();
+        animateDeal();
         maybeBotLoop();
       });
       btns.appendChild(next);
@@ -625,6 +660,7 @@
       const before = snapshotCardPositions();
       const action = E.botChooseAction(state, state.current, state.rng);
       const ev = E.playTurn(state, state.current, action);
+      ui.revealed = null;
       handleEvents(ev);
       render();
       animateEvents(ev, before);

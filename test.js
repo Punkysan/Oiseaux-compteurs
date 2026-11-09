@@ -264,4 +264,20 @@ console.log('Difficulté du robot et snapshot de justification :');
   }
 }
 
+// ---------- Mode hotseat (plusieurs humains sur la même tablette) ----------
+console.log('Mode hotseat (2 humains, même tablette) :');
+{
+  const s = E.newGame({ numPlayers: 2, names: ['Léa', 'Tom'], allHuman: true, rng: E.mulberry32(31) });
+  ok(s.players.every((p) => !p.isBot), 'allHuman : 2 joueurs humains, aucun robot');
+  ok(s.players[0].name === 'Léa' && s.players[1].name === 'Tom', 'noms personnalisés conservés');
+  let turns = 0;
+  while (s.phase === 'play' && turns++ < 3000) {
+    const a = E.botChooseAction(s, s.current, s.rng); // stratégie quelconque : les deux jouent "à la main"
+    E.playTurn(s, s.current, a);
+  }
+  ok(s.phase === 'roundOver', 'partie hotseat 2 humains terminée en ' + turns + ' tours');
+  const res = E.finishRound(s);
+  ok(res.winners.length >= 1, 'vainqueur déterminé en hotseat');
+}
+
 console.log('\nTous les tests ont réussi (' + passed + ' assertions).');
