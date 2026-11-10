@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const E = window.NombreMystere;
+  const VERSION = '1.6.0'; // synchronisé avec le fichier VERSION à la racine
   const $ = (s) => document.querySelector(s);
 
   let state = null;
@@ -360,8 +361,10 @@
       this.textContent = soundOn ? '🔊' : '🔇';
       if (soundOn) ensureAudio();
     });
+    const ver = $('#ver');
+    if (ver) ver.textContent = 'v' + VERSION;
     showScreen('menu');
-    window.NMUI = { getState: function () { return state; } };
+    window.NMUI = { getState: function () { return state; }, version: VERSION };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

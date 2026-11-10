@@ -72,6 +72,20 @@ Valide la composition du jeu, la mise en place (règle des « 10 »), les règle
 repioche), les scores, et simule des **parties complètes** pour 1 à 4 joueurs avec toutes les
 combinaisons de variantes (conservation des 40 cartes garantie).
 
+## Version
+
+Version courante : **1.6.0** (fichier `VERSION` à la racine, badge « v… » affiché dans chaque jeu).
+
+| Version | Nouveautés |
+| --- | --- |
+| 1.0.0 | « Oiseau, compte ! » de base (règles officielles, variantes 1-10, solo / robots) |
+| 1.1.0 | Mode « toi contre 1 robot » ; aucune carte mise en avant |
+| 1.2.0 | Niveau des robots facile/normal ; justification des cartes quand un robot gagne |
+| 1.3.0 | Animations des cartes, glisser-déposer, hotseat 2-4 joueurs sur une tablette |
+| 1.4.0 | Jeu « Nombre mystère » (`nombre-mystere/`), jouable à 2 sur une tablette |
+| 1.5.0 | Vrais visuels des cartes (assets officiels Eduscol / © Charlotte Gastaut) |
+| 1.6.0 | Main des robots face visible, vrai dos sur la pioche, numéro de version affiché |
+
 ## Crédits
 
 Jeu original : Ministère de l'Éducation nationale, de la Jeunesse et des Sports — collection

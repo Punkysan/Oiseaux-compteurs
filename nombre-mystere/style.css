@@ -17,7 +17,8 @@ body {
   padding: 8px 16px; background: var(--accent); color: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,.25); position: sticky; top: 0; z-index: 20;
 }
-#topbar h1 { font-size: 1.3rem; margin: 0; text-shadow: 1px 1px 0 rgba(0,0,0,.3); }
+#topbar h1 { font-size: 1.3rem; margin: 0; text-shadow: 1px 1px 0 rgba(0,0,0,.3); display: flex; align-items: center; gap: 8px; }
+.ver { font-size: .75rem; font-weight: 800; background: rgba(255,255,255,.25); padding: 2px 9px; border-radius: 999px; }
 .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip-btn {
   font-family: inherit; font-size: .95rem; border: none; border-radius: 999px;

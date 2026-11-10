@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const E = window.OiseauEngine;
+  const VERSION = '1.6.0'; // synchronisé avec le fichier VERSION à la racine
   const $ = (s) => document.querySelector(s);
 
   let state = null;
@@ -730,9 +731,11 @@
       if (e.target === $('#modal-rules')) $('#modal-rules').hidden = true;
     });
     initDropZone();
+    const ver = $('#ver');
+    if (ver) ver.textContent = 'v' + VERSION;
     showScreen('menu');
     // Poignée de débogage / test (lecture seule).
-    window.OiseauUI = { getState: function () { return state; } };
+    window.OiseauUI = { getState: function () { return state; }, version: VERSION };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
