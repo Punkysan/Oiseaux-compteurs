@@ -32,6 +32,7 @@ aucun serveur requis).
 
 - Jeu de **40 cartes** : valeurs 1 à 10, en 4 couleurs (bleu, jaune, orange, violet).
 - **Solo « défi Piou-Piou ! » (1 joueur), ou toi contre 1 à 3 robots** (2 à 4 joueurs au total).
+- **Cartes visibles** : les vraies cartes officielles (assets/cartes), la pioche montre le vrai dos, et la main des **robots est face visible** (seuls les joueurs humains en hotseat ont leur main cachée entre les tours).
 - Aucune aide visuelle : les cartes permettant de faire un pli ne sont **pas mises en avant** ; un coup illégal est simplement refusé avec un message (comme au jeu physique).
 - **Niveau des robots** : « facile » (défaut, pour les 6-7 ans : les robots jouent au hasard) ou « normal » (meilleur pli à chaque tour).
 - **Justification** : quand un robot remporte une manche (ou le match), ses cartes ramassées sont affichées dans la fenêtre de fin.

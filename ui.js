@@ -201,7 +201,12 @@
       box.id = 'opp-' + p.id;
       box.appendChild(el('div', 'opp-name', (p.isBot ? '🤖 ' : '🧒 ') + p.name));
       const backs = el('div', 'backs');
-      for (let k = 0; k < p.hand.length; k++) backs.appendChild(cardEl(null, { back: true, small: true }));
+      if (p.isBot) {
+        // Main du robot visible : vraies cartes face visible (les humains non courants restent cachés).
+        for (const c of p.hand) backs.appendChild(cardEl(c, { small: true }));
+      } else {
+        for (let k = 0; k < p.hand.length; k++) backs.appendChild(cardEl(null, { back: true, small: true }));
+      }
       box.appendChild(backs);
       const pile = el('div', 'pile');
       pile.id = 'opp-pile-' + p.id;
@@ -251,17 +256,21 @@
     }
     const mine = humanTurn();
     const hand = state.phase === 'play' && cur ? cur.hand : [];
-    if (!mine) {
+    if (!mine && cur && !cur.isBot) {
+      // Joueur humain non révélé (hotseat) : main cachée.
       for (let k = 0; k < hand.length; k++) wrap.appendChild(cardEl(null, { back: true }));
     } else {
+      // À soi (ou robot en train de jouer) : vraies cartes face visible.
       hand.forEach((card, i) => {
         const d = cardEl(card);
-        d.classList.add('clickable');
-        d.draggable = true;
-        d.addEventListener('dragstart', (e) => onCardDragStart(e, i));
-        d.addEventListener('dragend', onCardDragEnd);
+        if (mine) {
+          d.classList.add('clickable');
+          d.draggable = true;
+          d.addEventListener('dragstart', (e) => onCardDragStart(e, i));
+          d.addEventListener('dragend', onCardDragEnd);
+          d.addEventListener('click', () => onHandClick(i));
+        }
         if (ui.selHand === i) d.classList.add('selected');
-        d.addEventListener('click', () => onHandClick(i));
         wrap.appendChild(d);
       });
     }
