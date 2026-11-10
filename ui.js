@@ -134,19 +134,33 @@
   }
 
   // ---------- Cartes ----------
+  // Visuels officiels (assets/cartes/) avec repli sur le design CSS si l'image est absente.
+  const ASSETS = 'assets/cartes/';
   function cardEl(card, opts) {
     opts = opts || {};
     const d = el('div', 'card c-' + (card ? card.color : 'back') + (opts.small ? ' small' : '') + (opts.back ? ' back' : '') + (opts.cls ? ' ' + opts.cls : ''));
+    const img = new Image();
+    img.className = 'card-img';
+    img.alt = card ? E.cardLabel(card) : 'Carte cachée';
+    img.draggable = false;
     if (opts.back || !card) {
+      img.src = ASSETS + 'dos.png';
+      img.onerror = () => { img.remove(); };
+      img.onload = () => { d.innerHTML = ''; d.appendChild(img); };
       d.appendChild(el('span', 'back-bird', '🐣'));
+      d.appendChild(img);
       d.title = 'Carte cachée';
       return d;
     }
+    img.src = ASSETS + card.value + '-' + card.color + '.png';
+    img.onerror = () => { img.remove(); };
+    img.onload = () => { d.innerHTML = ''; d.appendChild(img); };
     const tl = el('span', 'corner tl', String(card.value));
     const br = el('span', 'corner br', String(card.value));
     const bird = el('span', 'bird', '🐦');
     const val = el('span', 'val', String(card.value));
     d.appendChild(tl); d.appendChild(bird); d.appendChild(val); d.appendChild(br);
+    d.appendChild(img);
     d.title = E.cardLabel(card);
     if (card.id !== undefined) d.dataset.cardId = String(card.id);
     return d;

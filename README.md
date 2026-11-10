@@ -76,3 +76,7 @@ combinaisons de variantes (conservation des 40 cartes garantie).
 Jeu original : Ministère de l'Éducation nationale, de la Jeunesse et des Sports — collection
 « Oiseaux-compteurs ». Documents sources : « Oiseau compte — Attendus et règle du jeu » et
 « Document d'accompagnement ».
+
+**Visuels des cartes** (`assets/cartes/*.png` : 40 faces + `dos.png`) : extraits du matériel imprimable
+officiel « Oiseaux-compteurs » publié sur Éduscol (illustrations © Charlotte Gastaut, MENJS), via la mise
+en page A4 (9 cartes/page) partagée par C. Largillier. Utilisation dans un cadre éducatif.
