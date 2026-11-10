@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const E = window.OiseauEngine;
-  const VERSION = '1.6.0'; // synchronisé avec le fichier VERSION à la racine
+  const VERSION = '1.6.1'; // synchronisé avec le fichier VERSION à la racine
   const $ = (s) => document.querySelector(s);
 
   let state = null;

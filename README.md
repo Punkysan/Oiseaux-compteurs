@@ -74,7 +74,7 @@ combinaisons de variantes (conservation des 40 cartes garantie).
 
 ## Version
 
-Version courante : **1.6.0** (fichier `VERSION` à la racine, badge « v… » affiché dans chaque jeu).
+Version courante : **1.6.1** (fichier `VERSION` à la racine, badge « v… » affiché dans chaque jeu).
 
 | Version | Nouveautés |
 | --- | --- |
@@ -85,6 +85,7 @@ Version courante : **1.6.0** (fichier `VERSION` à la racine, badge « v… » a
 | 1.4.0 | Jeu « Nombre mystère » (`nombre-mystere/`), jouable à 2 sur une tablette |
 | 1.5.0 | Vrais visuels des cartes (assets officiels Eduscol / © Charlotte Gastaut) |
 | 1.6.0 | Main des robots face visible, vrai dos sur la pioche, numéro de version affiché |
+| 1.6.1 | Vrai dos officiel des cartes (page 7 du PDF « jeu-carts-a-imprimer.pdf » : arbre + oiseaux + bordure verte) |
 
 ## Crédits
 
